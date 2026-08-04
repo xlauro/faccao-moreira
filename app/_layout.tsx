@@ -25,7 +25,7 @@ function InitialLayout() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2C1435' }}>
+      <View className="flex-1 justify-center items-center bg-[#2C1435]">
         <ActivityIndicator size="large" color="#6B224F" />
       </View>
     );
