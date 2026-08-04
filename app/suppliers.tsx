@@ -10,7 +10,6 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { SupplierModel } from '../src/models/types';
 import { supplierRepository } from '../src/repositories/supplierRepository';
 
@@ -60,135 +59,83 @@ export default function SuppliersScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
-      <View style={{ flex: 1, padding: 16 }}>
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          style={{
-            backgroundColor: '#6B224F',
-            height: 48,
-            borderRadius: 12,
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 16,
-            elevation: 3,
-          }}
-        >
-          <Ionicons name="add" size={24} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Novo Fornecedor</Text>
-        </TouchableOpacity>
+    <View className="flex-1 bg-gray-100 p-4">
+      <TouchableOpacity
+        onPress={() => setModalVisible(true)}
+        className="bg-brand-burgundy h-12 rounded-xl flex-row justify-center items-center mb-4 shadow-md"
+      >
+        <Ionicons name="add" size={24} color="#fff" className="mr-1.5" />
+        <Text className="text-white text-base font-bold">Novo Fornecedor</Text>
+      </TouchableOpacity>
 
-        {loading ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#6B224F" />
-          </View>
-        ) : suppliers.length === 0 ? (
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons name="business-outline" size={60} color="#ccc" />
-            <Text style={{ fontSize: 16, color: '#888', marginTop: 12 }}>Nenhum fornecedor cadastrado</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={suppliers}
-            keyExtractor={(item) => item.id || item.name}
-            renderItem={({ item }) => (
-              <View
-                style={{
-                  backgroundColor: '#fff',
-                  borderRadius: 12,
-                  padding: 16,
-                  marginBottom: 12,
-                  elevation: 2,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  borderLeftWidth: 4,
-                  borderLeftColor: '#6B224F',
-                }}
-              >
-                <View
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 22,
-                    backgroundColor: 'rgba(107, 34, 79, 0.1)',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginRight: 14,
-                  }}
-                >
-                  <Ionicons name="briefcase-outline" size={22} color="#6B224F" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#2C1435' }}>{item.name}</Text>
-                  <Text style={{ fontSize: 14, color: '#666', marginTop: 2 }}>📞 {item.phone}</Text>
-                </View>
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#6B224F" />
+        </View>
+      ) : suppliers.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          <Ionicons name="business-outline" size={60} color="#ccc" />
+          <Text className="text-base text-gray-500 mt-3">Nenhum fornecedor cadastrado</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={suppliers}
+          keyExtractor={(item) => item.id || item.name}
+          renderItem={({ item }) => (
+            <View className="bg-white rounded-xl p-4 mb-3 shadow-sm flex-row items-center border-l-4 border-brand-burgundy">
+              <View className="w-11 h-11 rounded-full bg-brand-burgundy/10 justify-center items-center mr-3.5">
+                <Ionicons name="briefcase-outline" size={22} color="#6B224F" />
               </View>
-            )}
-          />
-        )}
-      </View>
+              <View className="flex-1">
+                <Text className="text-base font-bold text-brand-plum">{item.name}</Text>
+                <Text className="text-sm text-gray-600 mt-0.5">📞 {item.phone}</Text>
+              </View>
+            </View>
+          )}
+        />
+      )}
 
       {/* Modal Add Supplier */}
       <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 20, padding: 24, elevation: 5 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#2C1435', marginBottom: 16 }}>
+        <View className="flex-1 bg-black/50 justify-center p-5">
+          <View className="bg-white rounded-2xl p-6 shadow-lg">
+            <Text className="text-xl font-bold text-brand-plum mb-4">
               Cadastrar Fornecedor
             </Text>
 
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 4 }}>Nome do Fornecedor</Text>
+            <Text className="text-sm font-semibold text-gray-700 mb-1">Nome do Fornecedor</Text>
             <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 10,
-                padding: 12,
-                fontSize: 16,
-                marginBottom: 16,
-              }}
+              className="border border-gray-300 rounded-xl p-3 text-base mb-4 bg-white text-gray-800"
               placeholder="Ex: Confecções Silva"
               value={name}
               onChangeText={setName}
             />
 
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 4 }}>Telefone / Celular</Text>
+            <Text className="text-sm font-semibold text-gray-700 mb-1">Telefone / Celular</Text>
             <TextInput
-              style={{
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 10,
-                padding: 12,
-                fontSize: 16,
-                marginBottom: 24,
-              }}
+              className="border border-gray-300 rounded-xl p-3 text-base mb-6 bg-white text-gray-800"
               placeholder="Ex: (11) 98765-4321"
               keyboardType="phone-pad"
               value={phone}
               onChangeText={setPhone}
             />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            <View className="flex-row justify-end">
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
-                style={{ paddingHorizontal: 16, paddingVertical: 12, marginRight: 8 }}
+                className="px-4 py-3 mr-2"
               >
-                <Text style={{ color: '#777', fontWeight: 'bold' }}>Cancelar</Text>
+                <Text className="text-gray-500 font-bold">Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleCreateSupplier}
                 disabled={submitting}
-                style={{
-                  backgroundColor: '#6B224F',
-                  paddingHorizontal: 20,
-                  paddingVertical: 12,
-                  borderRadius: 10,
-                }}
+                className="bg-brand-burgundy px-5 py-3 rounded-xl"
               >
                 {submitting ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={{ color: '#fff', fontWeight: 'bold' }}>Salvar</Text>
+                  <Text className="text-white font-bold">Salvar</Text>
                 )}
               </TouchableOpacity>
             </View>

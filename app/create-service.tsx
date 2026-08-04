@@ -124,23 +124,21 @@ export default function CreateServiceScreen() {
       Alert.alert('Sucesso', 'Lote de serviço criado com sucesso!', [
         { text: 'OK', onPress: () => router.replace('/') },
       ]);
-    } catch (error: any) {
-      Alert.alert('Erro', error.message || 'Erro ao criar lote de serviço.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: '#f8f9fa' }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-gray-100">
+      <ScrollView className="p-4">
         {/* Supplier */}
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16, elevation: 2 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#2C1435', marginBottom: 12 }}>
+        <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+          <Text className="text-base font-bold text-brand-plum mb-3">
             🏢 Fornecedor
           </Text>
           {suppliers.length > 0 && (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
+            <View className="flex-row flex-wrap mb-3">
               {suppliers.map((sup) => (
                 <TouchableOpacity
                   key={sup.id || sup.name}
@@ -148,16 +146,11 @@ export default function CreateServiceScreen() {
                     setSelectedSupplierId(sup.id || null);
                     setSupplierName(sup.name);
                   }}
-                  style={{
-                    backgroundColor: supplierName === sup.name ? '#6B224F' : '#f0f0f0',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 20,
-                    marginRight: 8,
-                    marginBottom: 8,
-                  }}
+                  className={`px-3 py-1.5 rounded-full mr-2 mb-2 ${
+                    supplierName === sup.name ? 'bg-brand-burgundy' : 'bg-gray-200'
+                  }`}
                 >
-                  <Text style={{ color: supplierName === sup.name ? '#fff' : '#333', fontSize: 13, fontWeight: '600' }}>
+                  <Text className={`text-xs font-semibold ${supplierName === sup.name ? 'text-white' : 'text-gray-800'}`}>
                     {sup.name}
                   </Text>
                 </TouchableOpacity>
@@ -166,7 +159,7 @@ export default function CreateServiceScreen() {
           )}
 
           <TextInput
-            style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 12, fontSize: 16 }}
+            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
             placeholder="Nome do Fornecedor"
             value={supplierName}
             onChangeText={(text) => {
@@ -177,24 +170,24 @@ export default function CreateServiceScreen() {
         </View>
 
         {/* Details: Piece Name, Processes, Price */}
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16, elevation: 2 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#2C1435', marginBottom: 12 }}>
+        <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+          <Text className="text-base font-bold text-brand-plum mb-3">
             👕 Detalhes do Lote
           </Text>
 
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 4 }}>Nome da Peça</Text>
+          <Text className="text-sm font-semibold text-gray-700 mb-1">Nome da Peça</Text>
           <TextInput
-            style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 12, fontSize: 16, marginBottom: 14 }}
+            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 mb-3 bg-white"
             placeholder="Ex: Camisa Polo, Calça Jeans"
             value={pieceName}
             onChangeText={setPieceName}
           />
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 4 }}>Processos / Peça</Text>
+          <View className="flex-row">
+            <View className="flex-1 mr-2">
+              <Text className="text-sm font-semibold text-gray-700 mb-1">Processos / Peça</Text>
               <TextInput
-                style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 12, fontSize: 16 }}
+                className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
                 placeholder="1"
                 keyboardType="numeric"
                 value={processesPerPieceText}
@@ -202,10 +195,10 @@ export default function CreateServiceScreen() {
               />
             </View>
 
-            <View style={{ flex: 1, marginLeft: 8 }}>
-              <Text style={{ fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 4 }}>Preço / Peça</Text>
+            <View className="flex-1 ml-2">
+              <Text className="text-sm font-semibold text-gray-700 mb-1">Preço / Peça</Text>
               <TextInput
-                style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 10, padding: 12, fontSize: 16 }}
+                className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
                 placeholder="R$ 0,00"
                 keyboardType="numeric"
                 value={priceFormattedText}
@@ -216,12 +209,12 @@ export default function CreateServiceScreen() {
         </View>
 
         {/* Variations */}
-        <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 24, elevation: 2 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#2C1435' }}>
+        <View className="bg-white rounded-2xl p-4 mb-6 shadow-sm">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-base font-bold text-brand-plum">
               🎨 Variações (Cores e Tamanhos)
             </Text>
-            <TouchableOpacity onPress={addVariation} style={{ backgroundColor: '#6B224F', padding: 8, borderRadius: 8 }}>
+            <TouchableOpacity onPress={addVariation} className="bg-brand-burgundy p-2 rounded-lg">
               <Ionicons name="add" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -229,45 +222,38 @@ export default function CreateServiceScreen() {
           {variations.map((v, index) => (
             <View
               key={index}
-              style={{
-                backgroundColor: '#f9f9f9',
-                borderRadius: 12,
-                padding: 12,
-                marginBottom: 10,
-                borderWidth: 1,
-                borderColor: '#eee',
-              }}
+              className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-2.5"
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <Text style={{ flex: 1, fontWeight: 'bold', color: '#6B224F' }}>Variação #{index + 1}</Text>
+              <View className="flex-row items-center mb-2">
+                <Text className="flex-1 font-bold text-brand-burgundy text-xs">Variação #{index + 1}</Text>
                 <TouchableOpacity onPress={() => removeVariation(index)}>
                   <Ionicons name="trash-outline" size={20} color="#d9534f" />
                 </TouchableOpacity>
               </View>
 
-              <View style={{ flexDirection: 'row' }}>
-                <View style={{ flex: 2, marginRight: 6 }}>
-                  <Text style={{ fontSize: 12, color: '#555' }}>Cor</Text>
+              <View className="flex-row">
+                <View className="flex-2 mr-1.5">
+                  <Text className="text-xs text-gray-600 mb-0.5">Cor</Text>
                   <TextInput
-                    style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, backgroundColor: '#fff' }}
+                    className="border border-gray-300 rounded-lg p-2 bg-white text-xs text-gray-800"
                     placeholder="Ex: Preto"
                     value={v.color}
                     onChangeText={(val) => updateVariation(index, 'color', val)}
                   />
                 </View>
-                <View style={{ flex: 1, marginRight: 6 }}>
-                  <Text style={{ fontSize: 12, color: '#555' }}>Tam.</Text>
+                <View className="flex-1 mr-1.5">
+                  <Text className="text-xs text-gray-600 mb-0.5">Tam.</Text>
                   <TextInput
-                    style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, backgroundColor: '#fff' }}
+                    className="border border-gray-300 rounded-lg p-2 bg-white text-xs text-gray-800"
                     placeholder="M"
                     value={v.size}
                     onChangeText={(val) => updateVariation(index, 'size', val)}
                   />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 12, color: '#555' }}>Qtd.</Text>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-600 mb-0.5">Qtd.</Text>
                   <TextInput
-                    style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, backgroundColor: '#fff' }}
+                    className="border border-gray-300 rounded-lg p-2 bg-white text-xs text-gray-800"
                     placeholder="10"
                     keyboardType="numeric"
                     value={v.quantity.toString()}
@@ -283,20 +269,12 @@ export default function CreateServiceScreen() {
         <TouchableOpacity
           onPress={handleSaveService}
           disabled={submitting}
-          style={{
-            backgroundColor: '#6B224F',
-            height: 52,
-            borderRadius: 14,
-            justifyContent: 'center',
-            alignItems: 'center',
-            elevation: 4,
-            marginBottom: 40,
-          }}
+          className="bg-brand-burgundy h-13 rounded-2xl justify-center items-center shadow-md mb-10"
         >
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={{ color: '#fff', fontSize: 17, fontWeight: 'bold' }}>Salvar Lote de Serviço</Text>
+            <Text className="text-white text-base font-bold">Salvar Lote de Serviço</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
