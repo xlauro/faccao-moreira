@@ -1,24 +1,60 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import React from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { ActivityIndicator, View } from 'react-native';
+import '../globals.css';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+function InitialLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+  React.useEffect(() => {
+    if (isLoading) return;
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // Redirect to login screen if not authenticated
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      // Redirect to home if authenticated
+      router.replace('/');
+    }
+  }, [isAuthenticated, isLoading, segments]);
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#2C1435' }}>
+        <ActivityIndicator size="large" color="#6B224F" />
+      </View>
+    );
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: '#2C1435' },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: { fontWeight: 'bold' },
+        headerBackTitle: 'Voltar',
+      }}
+    >
+      <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)/register" options={{ headerTitle: 'Cadastro de Costureira' }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="create-service" options={{ headerTitle: 'Novo Lote de Serviço' }} />
+      <Stack.Screen name="edit-service" options={{ headerTitle: 'Editar Lote de Serviço' }} />
+      <Stack.Screen name="start-service" options={{ headerTitle: 'Apontar Processos' }} />
+      <Stack.Screen name="suppliers" options={{ headerTitle: 'Gerenciar Fornecedores' }} />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <InitialLayout />
+    </AuthProvider>
   );
 }
