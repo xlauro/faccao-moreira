@@ -12,7 +12,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ServiceVariationModel, SupplierModel } from '../src/models/types';
+import { NewProcessModal } from '../src/components/modals/NewProcessModal';
+import { SewingProcessModel, ServiceVariationModel, SupplierModel } from '../src/models/types';
+import { processRepository } from '../src/repositories/processRepository';
 import { serviceRepository } from '../src/repositories/serviceRepository';
 import { supplierRepository } from '../src/repositories/supplierRepository';
 import { parseCurrencyInput } from '../src/utils/currencyFormatter';
@@ -25,7 +27,10 @@ export default function CreateServiceScreen() {
   const [supplierName, setSupplierName] = useState('');
 
   const [pieceName, setPieceName] = useState('');
-  const [processesPerPieceText, setProcessesPerPieceText] = useState('1');
+  const [allProcesses, setAllProcesses] = useState<SewingProcessModel[]>([]);
+  const [selectedProcesses, setSelectedProcesses] = useState<string[]>([]);
+  const [newProcessModalVisible, setNewProcessModalVisible] = useState(false);
+
   const [priceFormattedText, setPriceFormattedText] = useState('R$ 0,00');
   const [priceRawValue, setPriceRawValue] = useState(0.0);
 
@@ -37,16 +42,30 @@ export default function CreateServiceScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    loadSuppliers();
+    loadInitialData();
   }, []);
 
-  const loadSuppliers = async () => {
+  const loadInitialData = async () => {
     try {
-      const data = await supplierRepository.getAllSuppliers();
-      setSuppliers(data);
+      const supps = await supplierRepository.getAllSuppliers();
+      setSuppliers(supps);
+
+      const procs = await processRepository.getAllProcesses();
+      setAllProcesses(procs);
     } catch (e) {
-      console.warn('Erro ao carregar fornecedores');
+      console.warn('Erro ao carregar dados iniciais');
     }
+  };
+
+  const toggleProcessSelection = (procName: string) => {
+    setSelectedProcesses((prev) =>
+      prev.includes(procName) ? prev.filter((p) => p !== procName) : [...prev, procName]
+    );
+  };
+
+  const handleProcessCreated = (newProc: SewingProcessModel) => {
+    setAllProcesses((prev) => [...prev, newProc]);
+    setSelectedProcesses((prev) => [...prev, newProc.name]);
   };
 
   const handlePriceChange = (text: string) => {
@@ -87,10 +106,8 @@ export default function CreateServiceScreen() {
       Alert.alert('Atenção', 'Informe o nome da peça (ex: Camisa Polo).');
       return;
     }
-
-    const procPerPiece = parseInt(processesPerPieceText, 10);
-    if (isNaN(procPerPiece) || procPerPiece < 1) {
-      Alert.alert('Atenção', 'O número de processos por peça deve ser no mínimo 1.');
+    if (selectedProcesses.length === 0) {
+      Alert.alert('Atenção', 'Selecione pelo menos 1 processo de costura para a peça.');
       return;
     }
 
@@ -116,7 +133,8 @@ export default function CreateServiceScreen() {
         supplierId: selectedSupplierId,
         supplierName: supplierName.trim(),
         pieceName: pieceName.trim(),
-        processesPerPiece: procPerPiece,
+        processesPerPiece: selectedProcesses.length,
+        selectedProcesses,
         pricePerPiece: priceRawValue,
         variations,
       });
@@ -179,43 +197,79 @@ export default function CreateServiceScreen() {
           )}
         </View>
 
-        {/* Details: Piece Name, Processes, Price */}
+        {/* Details: Piece Name, Sewing Processes, Price */}
         <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
           <Text className="text-base font-bold text-brand-plum mb-3">
-            👕 Detalhes do Lote
+            👕 Detalhes da Peça
           </Text>
 
           <Text className="text-sm font-semibold text-gray-700 mb-1">Nome da Peça</Text>
           <TextInput
-            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 mb-3 bg-white"
+            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 mb-4 bg-white"
             placeholder="Ex: Camisa Polo, Calça Jeans"
             value={pieceName}
             onChangeText={setPieceName}
           />
 
-          <View className="flex-row">
-            <View className="flex-1 mr-2">
-              <Text className="text-sm font-semibold text-gray-700 mb-1">Processos / Peça</Text>
-              <TextInput
-                className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
-                placeholder="1"
-                keyboardType="numeric"
-                value={processesPerPieceText}
-                onChangeText={setProcessesPerPieceText}
-              />
+          {/* Sewing Processes Selection Section */}
+          <View className="mb-4 bg-brand-burgundy/5 p-3.5 rounded-xl border border-brand-burgundy/20">
+            <View className="flex-row justify-between items-center mb-2.5">
+              <View>
+                <Text className="text-brand-plum font-bold text-sm">🧵 Processos de Costura</Text>
+                <Text className="text-brand-burgundy font-bold text-xs">
+                  Calculado: {selectedProcesses.length} processos por peça
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setNewProcessModalVisible(true)}
+                className="bg-brand-burgundy px-3 py-1.5 rounded-lg flex-row items-center"
+              >
+                <Ionicons name="add" size={16} color="#fff" className="mr-0.5" />
+                <Text className="text-white font-bold text-xs">Novo Processo</Text>
+              </TouchableOpacity>
             </View>
 
-            <View className="flex-1 ml-2">
-              <Text className="text-sm font-semibold text-gray-700 mb-1">Preço / Peça</Text>
-              <TextInput
-                className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
-                placeholder="R$ 0,00"
-                keyboardType="numeric"
-                value={priceFormattedText}
-                onChangeText={handlePriceChange}
-              />
-            </View>
+            {allProcesses.length === 0 ? (
+              <ActivityIndicator color="#6B224F" />
+            ) : (
+              <View className="flex-row flex-wrap">
+                {allProcesses.map((proc) => {
+                  const isChecked = selectedProcesses.includes(proc.name);
+                  return (
+                    <TouchableOpacity
+                      key={proc.id || proc.name}
+                      onPress={() => toggleProcessSelection(proc.name)}
+                      className={`px-3 py-2 rounded-xl mr-2 mb-2 flex-row items-center border ${
+                        isChecked
+                          ? 'bg-brand-burgundy border-brand-burgundy'
+                          : 'bg-white border-gray-300'
+                      }`}
+                    >
+                      <Ionicons
+                        name={isChecked ? 'checkbox' : 'square-outline'}
+                        size={16}
+                        color={isChecked ? '#fff' : '#666'}
+                        className="mr-1.5"
+                      />
+                      <Text className={`text-xs font-bold ${isChecked ? 'text-white' : 'text-gray-800'}`}>
+                        {proc.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
           </View>
+
+          <Text className="text-sm font-semibold text-gray-700 mb-1">Preço / Peça</Text>
+          <TextInput
+            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
+            placeholder="R$ 0,00"
+            keyboardType="numeric"
+            value={priceFormattedText}
+            onChangeText={handlePriceChange}
+          />
         </View>
 
         {/* Variations */}
@@ -288,6 +342,12 @@ export default function CreateServiceScreen() {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      <NewProcessModal
+        visible={newProcessModalVisible}
+        onClose={() => setNewProcessModalVisible(false)}
+        onProcessCreated={handleProcessCreated}
+      />
     </KeyboardAvoidingView>
   );
 }

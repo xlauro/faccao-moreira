@@ -22,6 +22,12 @@ export interface ServiceVariationModel {
   defects: number;
 }
 
+export interface SewingProcessModel {
+  id?: string;
+  name: string;
+  createdAt?: string | Date;
+}
+
 export interface ServiceModel {
   id?: string;
   supplierId?: string | null;
@@ -32,6 +38,7 @@ export interface ServiceModel {
   status: string; // 'Pendente' | 'Em Andamento' | 'Concluído'
   createdAt?: string | Date;
   variations: ServiceVariationModel[];
+  selectedProcesses?: string[];
 }
 
 export interface ServiceLogModel {

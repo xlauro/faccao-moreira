@@ -33,6 +33,7 @@ export class ServiceRepository {
     processesPerPiece = 1,
     pricePerPiece = 0.0,
     variations,
+    selectedProcesses = [],
   }: {
     supplierId?: string | null;
     supplierName: string;
@@ -40,21 +41,31 @@ export class ServiceRepository {
     processesPerPiece?: number;
     pricePerPiece?: number;
     variations: ServiceVariationModel[];
+    selectedProcesses?: string[];
   }): Promise<ServiceModel> {
+    const calculatedProcesses = selectedProcesses.length > 0 ? selectedProcesses.length : processesPerPiece;
     console.log(
-      `[ServiceRepository] Criando novo serviço: peça="${pieceName}", fornecedor="${supplierName}", proc/peça=${processesPerPiece}, valor/peça=${pricePerPiece}, variações=${variations.length}`
+      `[ServiceRepository] Criando novo serviço: peça="${pieceName}", fornecedor="${supplierName}", proc/peça=${calculatedProcesses}, valor/peça=${pricePerPiece}, variações=${variations.length}`
     );
 
     try {
       // Insert service record (status = 'Pendente')
       const result = await sql`
         INSERT INTO services (supplier_id, supplier_name, piece_name, processes_per_piece, price_per_piece, status)
-        VALUES (${supplierId || null}, ${supplierName.trim()}, ${pieceName.trim()}, ${processesPerPiece}, ${pricePerPiece}, 'Pendente')
+        VALUES (${supplierId || null}, ${supplierName.trim()}, ${pieceName.trim()}, ${calculatedProcesses}, ${pricePerPiece}, 'Pendente')
         RETURNING id, supplier_id, supplier_name, piece_name, processes_per_piece, price_per_piece, status, created_at
       `;
 
       const row = result[0];
       const serviceId = row.id.toString();
+
+      // Insert selected processes
+      for (const procName of selectedProcesses) {
+        await sql`
+          INSERT INTO service_selected_processes (service_id, process_name)
+          VALUES (${serviceId}::uuid, ${procName.trim()})
+        `;
+      }
 
       const createdVariations: ServiceVariationModel[] = [];
 
@@ -87,6 +98,7 @@ export class ServiceRepository {
         status: row.status as string,
         createdAt: row.created_at,
         variations: createdVariations,
+        selectedProcesses,
       };
 
       console.log(`[ServiceRepository] Serviço criado com sucesso como Pendente! id=${service.id}`);
@@ -109,6 +121,7 @@ export class ServiceRepository {
     pricePerPiece,
     status,
     variations,
+    selectedProcesses = [],
   }: {
     id: string;
     supplierId?: string | null;
@@ -118,7 +131,9 @@ export class ServiceRepository {
     pricePerPiece: number;
     status: string;
     variations: ServiceVariationModel[];
+    selectedProcesses?: string[];
   }): Promise<ServiceModel> {
+    const calculatedProcesses = selectedProcesses.length > 0 ? selectedProcesses.length : processesPerPiece;
     console.log(`[ServiceRepository] Atualizando serviço: id=${id}, peça="${pieceName}", status="${status}"`);
     try {
       await sql`
@@ -126,11 +141,22 @@ export class ServiceRepository {
         SET supplier_id = ${supplierId || null},
             supplier_name = ${supplierName.trim()},
             piece_name = ${pieceName.trim()},
-            processes_per_piece = ${processesPerPiece},
+            processes_per_piece = ${calculatedProcesses},
             price_per_piece = ${pricePerPiece},
             status = ${status}
         WHERE id = ${id}::uuid
       `;
+
+      // Re-insert selected processes
+      await sql`
+        DELETE FROM service_selected_processes WHERE service_id = ${id}::uuid
+      `;
+      for (const procName of selectedProcesses) {
+        await sql`
+          INSERT INTO service_selected_processes (service_id, process_name)
+          VALUES (${id}::uuid, ${procName.trim()})
+        `;
+      }
 
       // Delete existing variations & re-insert
       await sql`
@@ -169,10 +195,11 @@ export class ServiceRepository {
         supplierId: supplierId || null,
         supplierName,
         pieceName,
-        processesPerPiece,
+        processesPerPiece: calculatedProcesses,
         pricePerPiece,
         status,
         variations: updatedVariations,
+        selectedProcesses,
       };
 
       console.log(`[ServiceRepository] Serviço ${id} atualizado com sucesso!`);
@@ -221,6 +248,15 @@ export class ServiceRepository {
           defects: parseIntVal(vRow.defects, 0),
         }));
 
+        const procsResult = await sql`
+          SELECT process_name
+          FROM service_selected_processes
+          WHERE service_id = ${sId}::uuid
+          ORDER BY created_at ASC
+        `;
+
+        const selProcs: string[] = (procsResult || []).map((pRow) => pRow.process_name as string);
+
         servicesList.push({
           id: sId,
           supplierId: row.supplier_id?.toString() || null,
@@ -231,6 +267,7 @@ export class ServiceRepository {
           status: row.status as string,
           createdAt: row.created_at,
           variations: vars,
+          selectedProcesses: selProcs,
         });
       }
 
