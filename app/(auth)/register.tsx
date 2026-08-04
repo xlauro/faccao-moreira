@@ -56,7 +56,7 @@ export default function RegisterScreen() {
   };
 
   return (
-    <LinearGradient colors={['#2C1435', '#4A1942', '#6B224F']} style={{ flex: 1 }}>
+    <LinearGradient colors={['#2C1435', '#4A1942', '#6B224F']} className="flex-1">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}>
           <View className="bg-white/95 rounded-3xl p-7 shadow-xl">
@@ -71,7 +71,7 @@ export default function RegisterScreen() {
             <View className="mb-4">
               <Text className="text-xs font-semibold text-gray-700 mb-1.5">Nome Completo</Text>
               <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-12 bg-white">
-                <Ionicons name="person-outline" size={20} color="#666" style={{ marginRight: 8 }} />
+                <Ionicons name="person-outline" size={20} color="#666" className="mr-2" />
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="Seu nome"
@@ -87,7 +87,7 @@ export default function RegisterScreen() {
             <View className="mb-4">
               <Text className="text-xs font-semibold text-gray-700 mb-1.5">E-mail</Text>
               <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-12 bg-white">
-                <Ionicons name="mail-outline" size={20} color="#666" style={{ marginRight: 8 }} />
+                <Ionicons name="mail-outline" size={20} color="#666" className="mr-2" />
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="seu@email.com"
@@ -104,7 +104,7 @@ export default function RegisterScreen() {
             <View className="mb-4">
               <Text className="text-xs font-semibold text-gray-700 mb-1.5">Senha</Text>
               <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-12 bg-white">
-                <Ionicons name="lock-closed-outline" size={20} color="#666" style={{ marginRight: 8 }} />
+                <Ionicons name="lock-closed-outline" size={20} color="#666" className="mr-2" />
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="Mínimo 6 caracteres"
@@ -123,7 +123,7 @@ export default function RegisterScreen() {
             <View className="mb-6">
               <Text className="text-xs font-semibold text-gray-700 mb-1.5">Confirmar Senha</Text>
               <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-12 bg-white">
-                <Ionicons name="lock-closed-outline" size={20} color="#666" style={{ marginRight: 8 }} />
+                <Ionicons name="lock-closed-outline" size={20} color="#666" className="mr-2" />
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="Repita a senha"

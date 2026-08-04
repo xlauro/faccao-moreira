@@ -67,7 +67,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient colors={['#2C1435', '#4A1942', '#6B224F']} style={{ flex: 1 }}>
+    <LinearGradient colors={['#2C1435', '#4A1942', '#6B224F']} className="flex-1">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
         <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}>
           <View className="bg-white/95 rounded-3xl p-7 shadow-xl">
@@ -84,7 +84,7 @@ export default function LoginScreen() {
             <View className="mb-4">
               <Text className="text-xs font-semibold text-gray-700 mb-1.5">E-mail</Text>
               <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-12 bg-white">
-                <Ionicons name="mail-outline" size={20} color="#666" style={{ marginRight: 8 }} />
+                <Ionicons name="mail-outline" size={20} color="#666" className="mr-2" />
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="seu@email.com"
@@ -101,7 +101,7 @@ export default function LoginScreen() {
             <View className="mb-6">
               <Text className="text-xs font-semibold text-gray-700 mb-1.5">Senha</Text>
               <View className="flex-row items-center border border-gray-300 rounded-xl px-3 h-12 bg-white">
-                <Ionicons name="lock-closed-outline" size={20} color="#666" style={{ marginRight: 8 }} />
+                <Ionicons name="lock-closed-outline" size={20} color="#666" className="mr-2" />
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="Sua senha"
@@ -136,7 +136,7 @@ export default function LoginScreen() {
                 disabled={isLoading}
                 className="border-1.5 border-brand-burgundy h-12 rounded-xl flex-row justify-center items-center mb-5"
               >
-                <Ionicons name="finger-print-outline" size={24} color="#6B224F" style={{ marginRight: 8 }} />
+                <Ionicons name="finger-print-outline" size={24} color="#6B224F" className="mr-2" />
                 <Text className="text-brand-burgundy text-sm font-semibold">Entrar com Biometria</Text>
               </TouchableOpacity>
             )}
