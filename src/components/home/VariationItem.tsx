@@ -68,7 +68,7 @@ export const VariationItem: React.FC<VariationItemProps> = ({
             onPress={onOpenProcessModal}
             className="flex-1 bg-brand-burgundy py-1.5 rounded-lg flex-row justify-center items-center mr-1.5"
           >
-            <Ionicons name="add-circle" size={14} color="#fff" style={{ marginRight: 4 }} />
+            <Ionicons name="add-circle" size={14} color="#fff" className="mr-1" />
             <Text className="text-white font-bold text-xs">+ Processos 🧵</Text>
           </TouchableOpacity>
 
@@ -76,7 +76,7 @@ export const VariationItem: React.FC<VariationItemProps> = ({
             onPress={onOpenDefectModal}
             className="border border-orange-400 px-2.5 py-1.5 rounded-lg flex-row justify-center items-center"
           >
-            <Ionicons name="warning-outline" size={14} color="#ea580c" style={{ marginRight: 4 }} />
+            <Ionicons name="warning-outline" size={14} color="#ea580c" className="mr-1" />
             <Text className="text-orange-900 font-bold text-xs">Defeito ⚠️</Text>
           </TouchableOpacity>
         </View>

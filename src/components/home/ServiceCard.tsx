@@ -107,7 +107,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
               onPress={() => onStartServiceDirectly(service)}
               className="bg-brand-burgundy px-3 py-2 rounded-lg flex-row items-center"
             >
-              <Ionicons name="play" size={14} color="#fff" style={{ marginRight: 4 }} />
+              <Ionicons name="play" size={14} color="#fff" className="mr-1" />
               <Text className="text-white text-xs font-bold">Iniciar 🚀</Text>
             </TouchableOpacity>
           </View>
@@ -167,7 +167,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
                 onPress={() => onConcludeService(service)}
                 className="border border-blue-400 py-1.5 rounded-lg flex-row justify-center items-center mt-2.5"
               >
-                <Ionicons name="checkmark-circle-outline" size={16} color="#1e40af" style={{ marginRight: 4 }} />
+                <Ionicons name="checkmark-circle-outline" size={16} color="#1e40af" className="mr-1" />
                 <Text className="text-blue-900 font-bold text-xs">Concluir Serviço ✅</Text>
               </TouchableOpacity>
             )}

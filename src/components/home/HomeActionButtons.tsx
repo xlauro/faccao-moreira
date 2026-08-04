@@ -12,7 +12,7 @@ export const HomeActionButtons: React.FC = () => {
         onPress={() => router.push('/start-service')}
         className="flex-1 bg-brand-plum py-3 rounded-xl shadow-sm mr-1.5 flex-row justify-center items-center"
       >
-        <Ionicons name="play-circle-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
+        <Ionicons name="play-circle-outline" size={18} color="#fff" className="mr-1" />
         <Text className="text-white font-bold text-xs">Iniciar Serviço 🚀</Text>
       </TouchableOpacity>
 
@@ -20,7 +20,7 @@ export const HomeActionButtons: React.FC = () => {
         onPress={() => router.push('/create-service')}
         className="flex-1 bg-brand-burgundy py-3 rounded-xl shadow-sm mr-1.5 flex-row justify-center items-center"
       >
-        <Ionicons name="add-circle-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
+        <Ionicons name="add-circle-outline" size={18} color="#fff" className="mr-1" />
         <Text className="text-white font-bold text-xs">Novo Serviço</Text>
       </TouchableOpacity>
 
