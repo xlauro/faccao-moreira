@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ServiceVariationModel } from '../src/models/types';
+import { ServiceVariationModel, SupplierModel } from '../src/models/types';
 import { serviceRepository } from '../src/repositories/serviceRepository';
 import { supplierRepository } from '../src/repositories/supplierRepository';
 import { formatCurrency, parseCurrencyInput } from '../src/utils/currencyFormatter';
@@ -22,6 +22,7 @@ export default function EditServiceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [loading, setLoading] = useState(true);
+  const [suppliers, setSuppliers] = useState<SupplierModel[]>([]);
   const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
   const [supplierName, setSupplierName] = useState('');
 
@@ -42,6 +43,9 @@ export default function EditServiceScreen() {
     if (!id) return;
     setLoading(true);
     try {
+      const allSuppliers = await supplierRepository.getAllSuppliers();
+      setSuppliers(allSuppliers);
+
       const allServices = await serviceRepository.getAllServices();
       const service = allServices.find((s) => s.id === id);
 
@@ -97,7 +101,7 @@ export default function EditServiceScreen() {
   const handleUpdateService = async () => {
     if (!id) return;
     if (!supplierName.trim()) {
-      Alert.alert('Atenção', 'Informe o fornecedor.');
+      Alert.alert('Atenção', 'Selecione um fornecedor cadastrado na lista.');
       return;
     }
     if (!pieceName.trim()) {
@@ -134,6 +138,34 @@ export default function EditServiceScreen() {
     }
   };
 
+  const handleDeleteService = () => {
+    if (!id) return;
+    Alert.alert(
+      'Excluir Lote de Serviço',
+      'Tem certeza que deseja excluir este lote de serviço? Esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            setSubmitting(true);
+            try {
+              await serviceRepository.deleteService(id);
+              Alert.alert('Sucesso', 'Lote de serviço excluído com sucesso!', [
+                { text: 'OK', onPress: () => router.replace('/') },
+              ]);
+            } catch (error: any) {
+              Alert.alert('Erro', error.message || 'Erro ao excluir lote de serviço.');
+            } finally {
+              setSubmitting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#2C1435]">
@@ -167,18 +199,49 @@ export default function EditServiceScreen() {
 
         {/* Supplier */}
         <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-brand-plum mb-3">
-            🏢 Fornecedor
-          </Text>
-          <TextInput
-            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
-            placeholder="Nome do Fornecedor"
-            value={supplierName}
-            onChangeText={(text) => {
-              setSupplierName(text);
-              setSelectedSupplierId(null);
-            }}
-          />
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-base font-bold text-brand-plum">🏢 Fornecedor Cadastrado</Text>
+            <TouchableOpacity onPress={() => router.push('/suppliers')}>
+              <Text className="text-brand-burgundy font-bold text-xs">+ Gerenciar</Text>
+            </TouchableOpacity>
+          </View>
+
+          {suppliers.length === 0 ? (
+            <View className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 items-center">
+              <Text className="text-amber-900 text-xs font-semibold mb-2 text-center">
+                Nenhum fornecedor cadastrado ainda. Cadastre um fornecedor na página de fornecedores.
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/suppliers')}
+                className="bg-brand-burgundy px-4 py-2 rounded-lg"
+              >
+                <Text className="text-white font-bold text-xs">+ Ir para Fornecedores</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="flex-row flex-wrap">
+              {suppliers.map((sup) => {
+                const isSelected = selectedSupplierId === sup.id || supplierName === sup.name;
+                return (
+                  <TouchableOpacity
+                    key={sup.id || sup.name}
+                    onPress={() => {
+                      setSelectedSupplierId(sup.id || null);
+                      setSupplierName(sup.name);
+                    }}
+                    className={`px-3.5 py-2 rounded-xl mr-2 mb-2 flex-row items-center border ${
+                      isSelected ? 'bg-brand-burgundy border-brand-burgundy' : 'bg-gray-100 border-gray-300'
+                    }`}
+                  >
+                    <Text className={`text-xs font-bold mr-1 ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                      {sup.name}
+                    </Text>
+                    {isSelected && <Ionicons name="checkmark-circle" size={14} color="#fff" />}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
         </View>
 
         {/* Details */}
@@ -270,17 +333,26 @@ export default function EditServiceScreen() {
           ))}
         </View>
 
-        {/* Update Button */}
+        {/* Actions Buttons */}
         <TouchableOpacity
           onPress={handleUpdateService}
           disabled={submitting}
-          className="bg-brand-burgundy h-13 rounded-2xl justify-center items-center shadow-md mb-10"
+          className="bg-brand-burgundy h-13 rounded-2xl justify-center items-center shadow-md mb-3"
         >
           {submitting ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text className="text-white text-base font-bold">Atualizar Lote de Serviço</Text>
           )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleDeleteService}
+          disabled={submitting}
+          className="bg-red-600/10 border border-red-500 h-13 rounded-2xl flex-row justify-center items-center mb-10"
+        >
+          <Ionicons name="trash-outline" size={20} color="#dc2626" className="mr-2" />
+          <Text className="text-red-600 text-base font-bold">Excluir Lote de Serviço</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

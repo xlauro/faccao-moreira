@@ -80,7 +80,7 @@ export default function CreateServiceScreen() {
 
   const handleSaveService = async () => {
     if (!supplierName.trim()) {
-      Alert.alert('Atenção', 'Informe ou selecione o fornecedor.');
+      Alert.alert('Atenção', 'Selecione um fornecedor cadastrado na lista.');
       return;
     }
     if (!pieceName.trim()) {
@@ -134,39 +134,49 @@ export default function CreateServiceScreen() {
       <ScrollView className="p-4">
         {/* Supplier */}
         <View className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-          <Text className="text-base font-bold text-brand-plum mb-3">
-            🏢 Fornecedor
-          </Text>
-          {suppliers.length > 0 && (
-            <View className="flex-row flex-wrap mb-3">
-              {suppliers.map((sup) => (
-                <TouchableOpacity
-                  key={sup.id || sup.name}
-                  onPress={() => {
-                    setSelectedSupplierId(sup.id || null);
-                    setSupplierName(sup.name);
-                  }}
-                  className={`px-3 py-1.5 rounded-full mr-2 mb-2 ${
-                    supplierName === sup.name ? 'bg-brand-burgundy' : 'bg-gray-200'
-                  }`}
-                >
-                  <Text className={`text-xs font-semibold ${supplierName === sup.name ? 'text-white' : 'text-gray-800'}`}>
-                    {sup.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-base font-bold text-brand-plum">🏢 Fornecedor Cadastrado</Text>
+            <TouchableOpacity onPress={() => router.push('/suppliers')}>
+              <Text className="text-brand-burgundy font-bold text-xs">+ Cadastrar</Text>
+            </TouchableOpacity>
+          </View>
+
+          {suppliers.length === 0 ? (
+            <View className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 items-center">
+              <Text className="text-amber-900 text-xs font-semibold mb-2 text-center">
+                Nenhum fornecedor cadastrado ainda. É necessário cadastrar um fornecedor antes de criar o lote.
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/suppliers')}
+                className="bg-brand-burgundy px-4 py-2 rounded-lg"
+              >
+                <Text className="text-white font-bold text-xs">+ Ir para Fornecedores</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="flex-row flex-wrap">
+              {suppliers.map((sup) => {
+                const isSelected = selectedSupplierId === sup.id || supplierName === sup.name;
+                return (
+                  <TouchableOpacity
+                    key={sup.id || sup.name}
+                    onPress={() => {
+                      setSelectedSupplierId(sup.id || null);
+                      setSupplierName(sup.name);
+                    }}
+                    className={`px-3.5 py-2 rounded-xl mr-2 mb-2 flex-row items-center border ${
+                      isSelected ? 'bg-brand-burgundy border-brand-burgundy' : 'bg-gray-100 border-gray-300'
+                    }`}
+                  >
+                    <Text className={`text-xs font-bold mr-1 ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                      {sup.name}
+                    </Text>
+                    {isSelected && <Ionicons name="checkmark-circle" size={14} color="#fff" />}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
-
-          <TextInput
-            className="border border-gray-300 rounded-xl p-3 text-base text-gray-800 bg-white"
-            placeholder="Nome do Fornecedor"
-            value={supplierName}
-            onChangeText={(text) => {
-              setSupplierName(text);
-              setSelectedSupplierId(null);
-            }}
-          />
         </View>
 
         {/* Details: Piece Name, Processes, Price */}
