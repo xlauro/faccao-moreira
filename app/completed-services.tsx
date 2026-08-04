@@ -23,6 +23,21 @@ import { serviceRepository } from '../src/repositories/serviceRepository';
 import { formatCurrency, parseCurrencyInput } from '../src/utils/currencyFormatter';
 import { getGarmentEmoji } from '../src/utils/garmentIconHelper';
 
+const MONTH_NAMES = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
+];
+
 type FilterMode = 'month' | 'lifetime';
 
 export default function CompletedServicesScreen() {
@@ -31,6 +46,13 @@ export default function CompletedServicesScreen() {
   const [loading, setLoading] = useState(true);
   const [allServices, setAllServices] = useState<ServiceModel[]>([]);
   const [filterMode, setFilterMode] = useState<FilterMode>('month'); // Padrão Mensal
+
+  // Month & Year Picker State
+  const currentDateObj = new Date();
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentDateObj.getMonth());
+  const [selectedYear, setSelectedYear] = useState<number>(currentDateObj.getFullYear());
+  const [pickerYear, setPickerYear] = useState<number>(currentDateObj.getFullYear());
+  const [monthPickerModalVisible, setMonthPickerModalVisible] = useState(false);
 
   // Edit Final Price Modal State
   const [editPriceModalVisible, setEditPriceModalVisible] = useState(false);
@@ -55,7 +77,7 @@ export default function CompletedServicesScreen() {
     }
   };
 
-  // Filter completed services by status and period
+  // Filter completed services by status and period (Month & Year or Lifetime)
   const completedServices = allServices.filter((s) => {
     const isDone =
       s.status.toLowerCase() === 'concluído' || s.status.toLowerCase() === 'concluido';
@@ -63,13 +85,12 @@ export default function CompletedServicesScreen() {
 
     if (filterMode === 'lifetime') return true;
 
-    // Filter by current month
-    const currentDate = new Date();
+    // Filter by selected Month and Year
     const serviceDate = s.completedAt ? new Date(s.completedAt) : s.createdAt ? new Date(s.createdAt) : new Date();
 
     return (
-      serviceDate.getMonth() === currentDate.getMonth() &&
-      serviceDate.getFullYear() === currentDate.getFullYear()
+      serviceDate.getMonth() === selectedMonth &&
+      serviceDate.getFullYear() === selectedYear
     );
   });
 
@@ -98,6 +119,18 @@ export default function CompletedServicesScreen() {
     const avgMs = totalMs / completedServices.length;
     averageDurationText = formatDurationMs(avgMs);
   }
+
+  const openMonthPicker = () => {
+    setPickerYear(selectedYear);
+    setMonthPickerModalVisible(true);
+  };
+
+  const selectMonthAndYear = (monthIdx: number) => {
+    setSelectedMonth(monthIdx);
+    setSelectedYear(pickerYear);
+    setFilterMode('month');
+    setMonthPickerModalVisible(false);
+  };
 
   const openEditPriceModal = (service: ServiceModel) => {
     setSelectedServiceForEdit(service);
@@ -130,6 +163,11 @@ export default function CompletedServicesScreen() {
     }
   };
 
+  const periodTitleText =
+    filterMode === 'lifetime'
+      ? 'Desde Sempre (Todo o Histórico)'
+      : `${MONTH_NAMES[selectedMonth]} de ${selectedYear}`;
+
   return (
     <View className="flex-1 bg-[#2C1435]">
       {/* Top Header */}
@@ -146,24 +184,28 @@ export default function CompletedServicesScreen() {
       {/* Filter Selector Tabs */}
       <View className="flex-row bg-[#3B1B47] px-4 pb-3">
         <TouchableOpacity
-          onPress={() => setFilterMode('month')}
-          className={`flex-1 py-2.5 rounded-xl mr-2 items-center ${
+          onPress={() => {
+            setFilterMode('month');
+            openMonthPicker();
+          }}
+          className={`flex-1 py-2.5 px-2 rounded-xl mr-2 flex-row justify-center items-center ${
             filterMode === 'month' ? 'bg-brand-burgundy' : 'bg-white/10'
           }`}
         >
-          <Text className={`font-bold text-xs ${filterMode === 'month' ? 'text-white' : 'text-gray-300'}`}>
-            📅 Este Mês
+          <Ionicons name="calendar-outline" size={14} color={filterMode === 'month' ? '#fff' : '#ccc'} className="mr-1" />
+          <Text className={`font-bold text-xs ${filterMode === 'month' ? 'text-white' : 'text-gray-300'}`} numberOfLines={1}>
+            {MONTH_NAMES[selectedMonth]} {selectedYear} ✏️
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => setFilterMode('lifetime')}
-          className={`flex-1 py-2.5 rounded-xl items-center ${
+          className={`flex-1 py-2.5 px-2 rounded-xl flex-row justify-center items-center ${
             filterMode === 'lifetime' ? 'bg-brand-burgundy' : 'bg-white/10'
           }`}
         >
           <Text className={`font-bold text-xs ${filterMode === 'lifetime' ? 'text-white' : 'text-gray-300'}`}>
-            🌐 Desde Sempre (Lifetime)
+            🌐 Desde Sempre
           </Text>
         </TouchableOpacity>
       </View>
@@ -176,9 +218,16 @@ export default function CompletedServicesScreen() {
         <ScrollView className="flex-1 p-4">
           {/* Summary Cards Grid */}
           <View className="bg-[#3B1B47] rounded-2xl p-4 mb-4 border border-purple-900/40 shadow-lg">
-            <Text className="text-gray-300 text-xs font-semibold mb-3">
-              📊 Resumo do Período ({filterMode === 'month' ? 'Este Mês' : 'Desde Sempre'})
-            </Text>
+            <View className="flex-row justify-between items-center mb-3 border-b border-white/10 pb-2">
+              <Text className="text-gray-300 text-xs font-semibold">
+                📊 Resumo do Período:
+              </Text>
+              <View className="bg-brand-burgundy/20 px-2.5 py-1 rounded-lg border border-brand-burgundy/40">
+                <Text className="text-brand-accent font-extrabold text-xs">
+                  {periodTitleText}
+                </Text>
+              </View>
+            </View>
 
             <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-white/10">
               <View>
@@ -362,6 +411,92 @@ export default function CompletedServicesScreen() {
                 ) : (
                   <Text className="text-white font-bold">Salvar Valor</Text>
                 )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Month & Year Calendar Selection Modal */}
+      <Modal visible={monthPickerModalVisible} animationType="slide" transparent>
+        <View className="flex-1 bg-black/60 justify-center p-5">
+          <View className="bg-white rounded-2xl p-6 shadow-xl">
+            <Text className="text-brand-plum font-bold text-lg mb-1">
+              📅 Selecionar Mês e Ano
+            </Text>
+            <Text className="text-gray-500 text-xs mb-4">
+              Escolha o ano e o mês para filtrar o resumo e os serviços concluídos.
+            </Text>
+
+            {/* Year Controls */}
+            <View className="flex-row justify-between items-center bg-gray-100 p-3 rounded-xl mb-4">
+              <TouchableOpacity
+                onPress={() => setPickerYear((y) => y - 1)}
+                className="bg-white p-2 rounded-lg border border-gray-300"
+              >
+                <Ionicons name="chevron-back" size={20} color="#333" />
+              </TouchableOpacity>
+
+              <Text className="text-brand-plum font-extrabold text-lg">
+                Ano {pickerYear}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => setPickerYear((y) => y + 1)}
+                className="bg-white p-2 rounded-lg border border-gray-300"
+              >
+                <Ionicons name="chevron-forward" size={20} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            {/* 12 Months Grid */}
+            <Text className="text-gray-700 font-bold text-xs mb-2">Selecione o Mês:</Text>
+            <View className="flex-row flex-wrap justify-between mb-5">
+              {MONTH_NAMES.map((mName, idx) => {
+                const isSelected = idx === selectedMonth && pickerYear === selectedYear;
+                return (
+                  <TouchableOpacity
+                    key={mName}
+                    onPress={() => selectMonthAndYear(idx)}
+                    className={`w-[30%] py-3 mb-2 rounded-xl items-center border ${
+                      isSelected
+                        ? 'bg-brand-burgundy border-brand-burgundy'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-bold ${
+                        isSelected ? 'text-white' : 'text-gray-800'
+                      }`}
+                    >
+                      {mName.substring(0, 3)}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Actions */}
+            <View className="flex-row justify-between items-center">
+              <TouchableOpacity
+                onPress={() => {
+                  const now = new Date();
+                  setPickerYear(now.getFullYear());
+                  setSelectedYear(now.getFullYear());
+                  setSelectedMonth(now.getMonth());
+                  setFilterMode('month');
+                  setMonthPickerModalVisible(false);
+                }}
+                className="bg-brand-plum/10 border border-brand-plum/30 px-3 py-2.5 rounded-xl"
+              >
+                <Text className="text-brand-plum font-bold text-xs">Mês Atual</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setMonthPickerModalVisible(false)}
+                className="px-4 py-2.5"
+              >
+                <Text className="text-gray-500 font-bold text-xs">Cancelar</Text>
               </TouchableOpacity>
             </View>
           </View>
