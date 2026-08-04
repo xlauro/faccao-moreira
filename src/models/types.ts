@@ -37,6 +37,8 @@ export interface ServiceModel {
   pricePerPiece: number;
   status: string; // 'Pendente' | 'Em Andamento' | 'Concluído'
   estimatedCompletionDate?: string | Date;
+  finalTotalPrice?: number | null;
+  completedAt?: string | Date;
   createdAt?: string | Date;
   variations: ServiceVariationModel[];
   selectedProcesses?: string[];
@@ -99,6 +101,35 @@ export function getServiceOverallProgressPercentage(service: ServiceModel): numb
 
 export function getServiceTotalPrice(service: ServiceModel): number {
   return getServiceTotalPieces(service) * service.pricePerPiece;
+}
+
+export function getServiceEffectiveTotalPrice(service: ServiceModel): number {
+  if (service.finalTotalPrice !== null && service.finalTotalPrice !== undefined) {
+    return service.finalTotalPrice;
+  }
+  return getServiceTotalPrice(service);
+}
+
+export function formatDurationMs(ms: number): string {
+  if (ms <= 0) return '0 min';
+  const totalMinutes = Math.floor(ms / (1000 * 60));
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days} dia${days > 1 ? 's' : ''}`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0 || parts.length === 0) parts.push(`${minutes}min`);
+
+  return parts.join(' e ');
+}
+
+export function getServiceDurationText(service: ServiceModel): string {
+  const startDate = service.createdAt ? new Date(service.createdAt).getTime() : Date.now();
+  const endDate = service.completedAt ? new Date(service.completedAt).getTime() : Date.now();
+  const diffMs = Math.max(0, endDate - startDate);
+  return formatDurationMs(diffMs);
 }
 
 export interface EstimatedCompletionResult {

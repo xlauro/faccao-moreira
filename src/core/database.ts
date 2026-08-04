@@ -44,12 +44,20 @@ export async function initDatabase(): Promise<void> {
         price_per_piece NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
         status VARCHAR(50) NOT NULL DEFAULT 'Pendente',
         estimated_completion_date TIMESTAMPTZ,
+        final_total_price NUMERIC(10, 2),
+        completed_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       );
     `;
 
     await sql`
       ALTER TABLE services ADD COLUMN IF NOT EXISTS estimated_completion_date TIMESTAMPTZ;
+    `;
+    await sql`
+      ALTER TABLE services ADD COLUMN IF NOT EXISTS final_total_price NUMERIC(10, 2);
+    `;
+    await sql`
+      ALTER TABLE services ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
     `;
 
     // 4. Table service_variations

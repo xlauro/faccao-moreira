@@ -217,7 +217,7 @@ export class ServiceRepository {
     console.log('[ServiceRepository] Buscando lista global de serviços...');
     try {
       const servicesResult = await sql`
-        SELECT id, supplier_id, supplier_name, piece_name, processes_per_piece, price_per_piece, status, estimated_completion_date, created_at
+        SELECT id, supplier_id, supplier_name, piece_name, processes_per_piece, price_per_piece, status, estimated_completion_date, final_total_price, completed_at, created_at
         FROM services
         ORDER BY created_at DESC
       `;
@@ -283,6 +283,8 @@ export class ServiceRepository {
           pricePerPiece: parseFloatVal(row.price_per_piece),
           status: row.status as string,
           estimatedCompletionDate: row.estimated_completion_date,
+          finalTotalPrice: row.final_total_price !== null && row.final_total_price !== undefined ? parseFloatVal(row.final_total_price) : null,
+          completedAt: row.completed_at,
           createdAt: row.created_at,
           variations: vars,
           selectedProcesses: selProcs,
@@ -304,9 +306,17 @@ export class ServiceRepository {
   async updateServiceStatus(id: string, status: string): Promise<void> {
     console.log(`[ServiceRepository] Alterando status do serviço ${id} para "${status}"...`);
     try {
-      await sql`
-        UPDATE services SET status = ${status} WHERE id = ${id}::uuid
-      `;
+      if (status.toLowerCase() === 'concluído' || status.toLowerCase() === 'concluido') {
+        await sql`
+          UPDATE services
+          SET status = ${status}, completed_at = CURRENT_TIMESTAMP
+          WHERE id = ${id}::uuid
+        `;
+      } else {
+        await sql`
+          UPDATE services SET status = ${status} WHERE id = ${id}::uuid
+        `;
+      }
       console.log(`[ServiceRepository] Status do serviço ${id} alterado com sucesso!`);
     } catch (error) {
       console.error(`[ServiceRepository] ERRO ao alterar status do serviço ${id}:`, error);
@@ -437,6 +447,23 @@ export class ServiceRepository {
       `;
     } catch (error) {
       console.error(`[ServiceRepository] Erro ao atualizar estimated_completion_date no serviço ${serviceId}:`, error);
+    }
+  }
+
+  /**
+   * Update final total price/earnings for a completed service batch.
+   */
+  async updateServiceFinalTotalPrice(serviceId: string, finalPrice: number): Promise<void> {
+    console.log(`[ServiceRepository] Atualizando valor final ganho do serviço ${serviceId} para R$ ${finalPrice}...`);
+    try {
+      await sql`
+        UPDATE services
+        SET final_total_price = ${finalPrice}
+        WHERE id = ${serviceId}::uuid
+      `;
+    } catch (error) {
+      console.error(`[ServiceRepository] Erro ao atualizar final_total_price no serviço ${serviceId}:`, error);
+      throw error;
     }
   }
 }
