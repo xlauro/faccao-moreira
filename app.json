@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "welth",
-    "slug": "welth",
+    "name": "Facção Moreira",
+    "slug": "faccao-moreira",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "welth",
+    "scheme": "faccaomoreira",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

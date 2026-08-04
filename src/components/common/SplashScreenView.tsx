@@ -68,12 +68,12 @@ export const SplashScreenView: React.FC<SplashScreenViewProps> = ({
         </Animated.View>
 
         {/* App Title & Tagline */}
-        <Text className="text-white text-3xl font-extrabold tracking-widest mb-1 text-center">
-          WELTH
+        <Text className="text-white text-2xl font-extrabold tracking-wider mb-1 text-center">
+          FACÇÃO MOREIRA
         </Text>
         <View className="h-0.5 w-12 bg-emerald-500 rounded-full mb-3" />
         <Text className="text-gray-300 text-xs font-semibold tracking-wider text-center mb-10">
-          GESTÃO DE PRODUÇÃO & FACÇÕES
+          GESTÃO DE PRODUÇÃO DE COSTURA
         </Text>
 
         {/* Loading Spinner & Message */}
