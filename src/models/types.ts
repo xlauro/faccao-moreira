@@ -36,6 +36,7 @@ export interface ServiceModel {
   processesPerPiece: number;
   pricePerPiece: number;
   status: string; // 'Pendente' | 'Em Andamento' | 'Concluído'
+  estimatedCompletionDate?: string | Date;
   createdAt?: string | Date;
   variations: ServiceVariationModel[];
   selectedProcesses?: string[];
@@ -105,6 +106,7 @@ export interface EstimatedCompletionResult {
   isDefault: boolean;
   rateText: string;
   daysRemaining: number;
+  date?: Date | null;
 }
 
 export function getServiceEstimatedCompletion(
@@ -120,6 +122,7 @@ export function getServiceEstimatedCompletion(
       isDefault: false,
       rateText: 'Finalizado',
       daysRemaining: 0,
+      date: null,
     };
   }
 
@@ -129,6 +132,7 @@ export function getServiceEstimatedCompletion(
       isDefault: true,
       rateText: 'Aguardando início',
       daysRemaining: 7,
+      date: null,
     };
   }
 
@@ -149,6 +153,7 @@ export function getServiceEstimatedCompletion(
       isDefault: true,
       rateText: 'Padrão (1 semana)',
       daysRemaining: 7,
+      date: estDate,
     };
   }
 
@@ -180,5 +185,6 @@ export function getServiceEstimatedCompletion(
     isDefault: false,
     rateText: `${Math.round(hourlyRate)} proc/h (~${daysRemaining} dia${daysRemaining > 1 ? 's' : ''})`,
     daysRemaining,
+    date: estDate,
   };
 }

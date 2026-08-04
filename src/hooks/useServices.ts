@@ -47,6 +47,14 @@ export function useServices() {
   useFocusEffect(
     useCallback(() => {
       fetchServices();
+
+      // Recalcular e atualizar previsões no banco de dados a cada 30 minutos (1.800.000 ms)
+      const interval = setInterval(() => {
+        console.log('[useServices] Recalculando previsões de conclusão (a cada 30 min)...');
+        fetchServices();
+      }, 1800000);
+
+      return () => clearInterval(interval);
     }, [])
   );
 

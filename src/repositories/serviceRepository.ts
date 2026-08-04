@@ -217,7 +217,7 @@ export class ServiceRepository {
     console.log('[ServiceRepository] Buscando lista global de serviços...');
     try {
       const servicesResult = await sql`
-        SELECT id, supplier_id, supplier_name, piece_name, processes_per_piece, price_per_piece, status, created_at
+        SELECT id, supplier_id, supplier_name, piece_name, processes_per_piece, price_per_piece, status, estimated_completion_date, created_at
         FROM services
         ORDER BY created_at DESC
       `;
@@ -282,6 +282,7 @@ export class ServiceRepository {
           processesPerPiece: parseIntVal(row.processes_per_piece, 1),
           pricePerPiece: parseFloatVal(row.price_per_piece),
           status: row.status as string,
+          estimatedCompletionDate: row.estimated_completion_date,
           createdAt: row.created_at,
           variations: vars,
           selectedProcesses: selProcs,
@@ -416,10 +417,26 @@ export class ServiceRepository {
       await sql`
         DELETE FROM services WHERE id = ${id}::uuid
       `;
-      console.log(`[ServiceRepository] Serviço ${id} deletado com sucesso!`);
     } catch (error) {
       console.error(`[ServiceRepository] ERRO ao deletar serviço ${id}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Update the estimated completion timestamp in NeonDB.
+   */
+  async updateServiceEstimatedCompletion(serviceId: string, estimatedDate: Date | null): Promise<void> {
+    console.log(`[ServiceRepository] Atualizando data prevista de conclusão do serviço ${serviceId}...`);
+    try {
+      const dateStr = estimatedDate ? estimatedDate.toISOString() : null;
+      await sql`
+        UPDATE services
+        SET estimated_completion_date = ${dateStr}
+        WHERE id = ${serviceId}::uuid
+      `;
+    } catch (error) {
+      console.error(`[ServiceRepository] Erro ao atualizar estimated_completion_date no serviço ${serviceId}:`, error);
     }
   }
 }

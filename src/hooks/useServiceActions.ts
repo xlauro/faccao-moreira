@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import {
   getEffectiveQuantity,
+  getServiceEstimatedCompletion,
   getServiceOverallProgressPercentage,
   getServiceTotalPieces,
   getServiceTotalProcesses,
@@ -133,6 +134,15 @@ export function useServiceActions(onServicesUpdated: () => void) {
         addedProcesses: totalCount,
         variationDescription: varDesc,
       });
+
+      // Recalcular e salvar a data prevista no NeonDB
+      const updatedEst = getServiceEstimatedCompletion(selectedServiceForProcess);
+      if (updatedEst.date) {
+        await serviceRepository.updateServiceEstimatedCompletion(
+          selectedServiceForProcess.id,
+          updatedEst.date
+        );
+      }
 
       setProcessModalVisible(false);
       onServicesUpdated();
