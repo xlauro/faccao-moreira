@@ -87,9 +87,7 @@ export default function HomeScreen() {
         visible={actions.processModalVisible}
         service={actions.selectedServiceForProcess}
         variation={actions.selectedVariationForProcess}
-        countText={actions.processInputCount}
         isSaving={actions.isSavingProcess}
-        onCountTextChange={actions.setProcessInputCount}
         onClose={() => actions.setProcessModalVisible(false)}
         onSubmit={actions.submitAddProcesses}
       />

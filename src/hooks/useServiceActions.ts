@@ -103,14 +103,19 @@ export function useServiceActions(onServicesUpdated: () => void) {
     }
     setSelectedServiceForProcess(service);
     setSelectedVariationForProcess(variation);
-    setProcessInputCount('1');
     setProcessModalVisible(true);
   };
 
-  const submitAddProcesses = async () => {
-    if (!selectedServiceForProcess || !selectedServiceForProcess.id || !selectedVariationForProcess || !selectedVariationForProcess.id) return;
-    const count = parseInt(processInputCount.trim(), 10);
-    if (isNaN(count) || count <= 0) {
+  const submitAddProcesses = async (totalCount: number, breakdownDescription: string) => {
+    if (
+      !selectedServiceForProcess ||
+      !selectedServiceForProcess.id ||
+      !selectedVariationForProcess ||
+      !selectedVariationForProcess.id
+    )
+      return;
+
+    if (totalCount <= 0) {
       Alert.alert('Atenção', 'Informe uma quantidade maior que 0.');
       return;
     }
@@ -118,19 +123,23 @@ export function useServiceActions(onServicesUpdated: () => void) {
     setIsSavingProcess(true);
     try {
       const seamstressName = currentUser?.name || 'Costureira';
-      const varDesc = `${selectedVariationForProcess.color} (${selectedVariationForProcess.size})`;
+      const baseDesc = `${selectedVariationForProcess.color} (${selectedVariationForProcess.size})`;
+      const varDesc = breakdownDescription ? `${baseDesc} - [${breakdownDescription}]` : baseDesc;
 
       await serviceRepository.addCompletedProcesses({
         serviceId: selectedServiceForProcess.id,
         variationId: selectedVariationForProcess.id,
         seamstressName,
-        addedProcesses: count,
+        addedProcesses: totalCount,
         variationDescription: varDesc,
       });
 
       setProcessModalVisible(false);
       onServicesUpdated();
-      Alert.alert('Sucesso', `+${count} processos adicionados para ${varDesc}! 🧵✨`);
+      Alert.alert(
+        'Sucesso',
+        `+${totalCount} processos adicionados para ${selectedVariationForProcess.color} (${selectedVariationForProcess.size})! 🧵✨`
+      );
     } catch (e) {
       Alert.alert('Erro', 'Erro ao adicionar processos.');
     } finally {

@@ -3,14 +3,13 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Modal,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ProcessInputModal } from '../src/components/modals/ProcessInputModal';
 import { useAuth } from '../src/context/AuthContext';
 import {
   getEffectiveQuantity,
@@ -39,10 +38,9 @@ export default function StartServiceScreen() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'production' | 'history'>('production');
 
-  // Custom Input Modal State
+  // Process Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<ServiceVariationModel | null>(null);
-  const [customCountText, setCustomCountText] = useState('1');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -70,14 +68,19 @@ export default function StartServiceScreen() {
     }
   };
 
-  const handleAddProcesses = async (variation: ServiceVariationModel, count: number) => {
+  const handleAddProcesses = async (
+    variation: ServiceVariationModel,
+    count: number,
+    breakdownText?: string
+  ) => {
     if (!service || !id || !variation.id) return;
     if (count <= 0) return;
 
     setSubmitting(true);
     try {
       const seamstressName = currentUser?.name || 'Costureira';
-      const variationDesc = `${variation.color} (${variation.size})`;
+      const baseDesc = `${variation.color} (${variation.size})`;
+      const variationDesc = breakdownText ? `${baseDesc} - [${breakdownText}]` : baseDesc;
 
       await serviceRepository.addCompletedProcesses({
         serviceId: id,
@@ -232,40 +235,24 @@ export default function StartServiceScreen() {
                   </View>
                 </View>
 
-                {/* Action Buttons (+1, +5, Custom, Defeito) */}
+                {/* Action Buttons (Apontar Processos, Defeito) */}
                 <View className="flex-row justify-between items-center">
-                  <TouchableOpacity
-                    onPress={() => handleAddProcesses(v, 1)}
-                    disabled={submitting}
-                    className="bg-brand-burgundy px-3 py-2 rounded-xl"
-                  >
-                    <Text className="text-white font-bold text-xs">+1 Proc.</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    onPress={() => handleAddProcesses(v, 5)}
-                    disabled={submitting}
-                    className="bg-brand-plum px-3 py-2 rounded-xl"
-                  >
-                    <Text className="text-white font-bold text-xs">+5 Proc.</Text>
-                  </TouchableOpacity>
-
                   <TouchableOpacity
                     onPress={() => {
                       setSelectedVariation(v);
-                      setCustomCountText('10');
                       setModalVisible(true);
                     }}
-                    className="bg-purple-900 px-3 py-2 rounded-xl"
+                    disabled={submitting}
+                    className="flex-1 bg-brand-burgundy py-2.5 rounded-xl flex-row justify-center items-center mr-2"
                   >
-                    <Text className="text-white font-bold text-xs">+ Custom</Text>
+                    <Text className="text-white font-bold text-xs">🧵 Apontar Processos</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     onPress={() => handleAddDefect(v)}
-                    className="border border-red-500 px-2.5 py-2 rounded-xl"
+                    className="border border-red-500 px-3 py-2.5 rounded-xl flex-row items-center"
                   >
-                    <Text className="text-red-500 font-bold text-xs">+ Defeito</Text>
+                    <Text className="text-red-500 font-bold text-xs">⚠️ Defeito</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -296,42 +283,19 @@ export default function StartServiceScreen() {
         />
       )}
 
-      {/* Modal Custom Count Input */}
-      <Modal visible={modalVisible} animationType="fade" transparent>
-        <View className="flex-1 bg-black/50 justify-center p-5">
-          <View className="bg-white rounded-2xl p-6 shadow-lg">
-            <Text className="text-brand-plum font-bold text-lg mb-1">Apontar Processos</Text>
-            <Text className="text-gray-500 text-xs mb-4">
-              Variação: {selectedVariation?.color} / {selectedVariation?.size}
-            </Text>
-
-            <TextInput
-              className="border border-gray-300 rounded-xl p-3 text-center text-lg font-bold mb-5"
-              keyboardType="numeric"
-              value={customCountText}
-              onChangeText={setCustomCountText}
-            />
-
-            <View className="flex-row justify-end">
-              <TouchableOpacity onPress={() => setModalVisible(false)} className="px-4 py-2.5 mr-2">
-                <Text className="text-gray-500 font-bold">Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  const count = parseInt(customCountText, 10);
-                  if (!isNaN(count) && count > 0 && selectedVariation) {
-                    handleAddProcesses(selectedVariation, count);
-                  }
-                }}
-                disabled={submitting}
-                className="bg-brand-burgundy px-5 py-2.5 rounded-xl"
-              >
-                <Text className="text-white font-bold">Confirmar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Modal Custom Process Input */}
+      <ProcessInputModal
+        visible={modalVisible}
+        service={service}
+        variation={selectedVariation}
+        isSaving={submitting}
+        onClose={() => setModalVisible(false)}
+        onSubmit={(totalCount, breakdownText) => {
+          if (selectedVariation) {
+            handleAddProcesses(selectedVariation, totalCount, breakdownText);
+          }
+        }}
+      />
     </View>
   );
 }
