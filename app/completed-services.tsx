@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import {
   formatDurationMs,
   getEffectiveQuantity,
@@ -170,6 +170,8 @@ export default function CompletedServicesScreen() {
 
   return (
     <View className="flex-1 bg-[#2C1435]">
+      <Stack.Screen options={{ headerShown: false }} />
+
       {/* Top Header */}
       <View className="flex-row justify-between items-center px-4 pt-12 pb-4 bg-[#3B1B47]">
         <TouchableOpacity onPress={() => router.back()} className="p-2">

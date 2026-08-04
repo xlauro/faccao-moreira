@@ -47,6 +47,7 @@ function InitialLayout() {
       <Stack.Screen name="edit-service" options={{ headerTitle: 'Editar Lote de Serviço' }} />
       <Stack.Screen name="start-service" options={{ headerTitle: 'Apontar Processos' }} />
       <Stack.Screen name="suppliers" options={{ headerTitle: 'Gerenciar Fornecedores' }} />
+      <Stack.Screen name="completed-services" options={{ headerShown: false }} />
     </Stack>
   );
 }
