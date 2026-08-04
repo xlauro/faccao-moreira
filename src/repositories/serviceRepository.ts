@@ -257,6 +257,23 @@ export class ServiceRepository {
 
         const selProcs: string[] = (procsResult || []).map((pRow) => pRow.process_name as string);
 
+        const logsResult = await sql`
+          SELECT id, service_id, variation_id, seamstress_name, processes_count, variation_description, created_at
+          FROM service_logs
+          WHERE service_id = ${sId}::uuid
+          ORDER BY created_at DESC
+        `;
+
+        const serviceLogs: ServiceLogModel[] = (logsResult || []).map((lRow) => ({
+          id: lRow.id.toString(),
+          serviceId: lRow.service_id.toString(),
+          variationId: lRow.variation_id?.toString(),
+          seamstressName: lRow.seamstress_name as string,
+          processesCount: parseIntVal(lRow.processes_count, 0),
+          variationDescription: lRow.variation_description as string,
+          createdAt: lRow.created_at,
+        }));
+
         servicesList.push({
           id: sId,
           supplierId: row.supplier_id?.toString() || null,
@@ -268,6 +285,7 @@ export class ServiceRepository {
           createdAt: row.created_at,
           variations: vars,
           selectedProcesses: selProcs,
+          logs: serviceLogs,
         });
       }
 

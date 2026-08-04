@@ -13,6 +13,7 @@ import { ProcessInputModal } from '../src/components/modals/ProcessInputModal';
 import { useAuth } from '../src/context/AuthContext';
 import {
   getEffectiveQuantity,
+  getServiceEstimatedCompletion,
   getServiceOverallProgressPercentage,
   getServiceTotalCompletedProcesses,
   getServiceTotalDefects,
@@ -136,6 +137,7 @@ export default function StartServiceScreen() {
   const totalDefects = getServiceTotalDefects(service);
   const overallProgress = getServiceOverallProgressPercentage(service);
   const totalEarnings = totalPieces * service.pricePerPiece;
+  const estCompletion = getServiceEstimatedCompletion(service, logs);
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -172,6 +174,17 @@ export default function StartServiceScreen() {
               <View className="flex-1">
                 <Text className="text-white text-xl font-bold">{service.pieceName}</Text>
                 <Text className="text-white/70 text-xs mt-0.5">🏢 {service.supplierName}</Text>
+              </View>
+            </View>
+
+            {/* Estimated Completion Banner */}
+            <View className="bg-white/10 rounded-xl p-3 mb-3 border border-white/20 flex-row justify-between items-center">
+              <Text className="text-white text-xs font-semibold">📅 Previsão de Conclusão:</Text>
+              <View className="items-end">
+                <Text className="text-brand-accent font-extrabold text-sm">
+                  {estCompletion.formattedDate}
+                </Text>
+                <Text className="text-white/70 text-[10px]">{estCompletion.rateText}</Text>
               </View>
             </View>
 

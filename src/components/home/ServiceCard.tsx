@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import {
+  getServiceEstimatedCompletion,
   getServiceOverallProgressPercentage,
   getServiceTotalCompletedProcesses,
   getServiceTotalDefects,
@@ -44,6 +45,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   const totalProcesses = getServiceTotalProcesses(service);
   const completedProcesses = getServiceTotalCompletedProcesses(service);
   const totalDefects = getServiceTotalDefects(service);
+  const estCompletion = getServiceEstimatedCompletion(service);
 
   return (
     <View className="bg-white rounded-2xl p-4 shadow-sm mb-4">
@@ -82,13 +84,30 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       </View>
 
       {/* Supplier & Price Info Row */}
-      <View className="flex-row justify-between items-center mb-3">
+      <View className="flex-row justify-between items-center mb-2">
         <View className="flex-row items-center">
           <Text className="text-xs mr-1">🏬</Text>
           <Text className="text-gray-600 text-xs font-semibold">Fornecedor: </Text>
           <Text className="text-brand-burgundy text-xs font-bold">{service.supplierName}</Text>
         </View>
         <Text className="text-green-800 font-bold text-sm">{formatCurrency(totalPrice)}</Text>
+      </View>
+
+      {/* Estimated Completion Date Card Row */}
+      <View className="bg-brand-burgundy/5 border border-brand-burgundy/15 rounded-xl px-3 py-2 mb-3 flex-row justify-between items-center">
+        <View className="flex-row items-center">
+          <Ionicons name="calendar-outline" size={16} color="#6B224F" className="mr-1.5" />
+          <Text className="text-brand-plum font-bold text-xs">Previsão de Conclusão:</Text>
+        </View>
+
+        <View className="items-end">
+          <Text className="text-brand-burgundy font-extrabold text-xs">
+            {estCompletion.formattedDate}
+          </Text>
+          <Text className="text-gray-500 text-[10px]">
+            {estCompletion.rateText}
+          </Text>
+        </View>
       </View>
 
       {/* CONDITIONAL BODY BASED ON STATUS */}

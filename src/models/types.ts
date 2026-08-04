@@ -39,6 +39,7 @@ export interface ServiceModel {
   createdAt?: string | Date;
   variations: ServiceVariationModel[];
   selectedProcesses?: string[];
+  logs?: ServiceLogModel[];
 }
 
 export interface ServiceLogModel {
@@ -97,4 +98,87 @@ export function getServiceOverallProgressPercentage(service: ServiceModel): numb
 
 export function getServiceTotalPrice(service: ServiceModel): number {
   return getServiceTotalPieces(service) * service.pricePerPiece;
+}
+
+export interface EstimatedCompletionResult {
+  formattedDate: string;
+  isDefault: boolean;
+  rateText: string;
+  daysRemaining: number;
+}
+
+export function getServiceEstimatedCompletion(
+  service: ServiceModel,
+  logs?: ServiceLogModel[]
+): EstimatedCompletionResult {
+  const totalProc = getServiceTotalProcesses(service);
+  const completedProc = getServiceTotalCompletedProcesses(service);
+
+  if (service.status.toLowerCase() === 'concluído' || (totalProc > 0 && completedProc >= totalProc)) {
+    return {
+      formattedDate: 'Concluído ✅',
+      isDefault: false,
+      rateText: 'Finalizado',
+      daysRemaining: 0,
+    };
+  }
+
+  if (service.status.toLowerCase() === 'pendente') {
+    return {
+      formattedDate: 'Pendente 📌',
+      isDefault: true,
+      rateText: 'Aguardando início',
+      daysRemaining: 7,
+    };
+  }
+
+  const remainingProc = Math.max(0, totalProc - completedProc);
+  const effectiveLogs = logs || service.logs || [];
+
+  // Se nenhum processo foi concluído ou não há logs: Previsão padrão de 1 semana (7 dias) após início
+  if (completedProc === 0 || effectiveLogs.length === 0) {
+    const baseDate = service.createdAt ? new Date(service.createdAt) : new Date();
+    const estDate = new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const day = String(estDate.getDate()).padStart(2, '0');
+    const month = String(estDate.getMonth() + 1).padStart(2, '0');
+    const year = estDate.getFullYear();
+
+    return {
+      formattedDate: `${day}/${month}/${year}`,
+      isDefault: true,
+      rateText: 'Padrão (1 semana)',
+      daysRemaining: 7,
+    };
+  }
+
+  // Calcular taxa com base nos logs
+  const sortedLogs = [...effectiveLogs].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+  const firstLogTime = new Date(sortedLogs[0].createdAt).getTime();
+
+  // Tempo decorrido em horas (mínimo de 30 min para evitar divisão por zero em primeiros testes)
+  const elapsedMs = Math.max(1000 * 60 * 30, Date.now() - firstLogTime);
+  const elapsedHours = elapsedMs / (1000 * 60 * 60);
+
+  // Taxa horária de processos
+  const hourlyRate = completedProc / elapsedHours;
+
+  // Assumindo 8h de trabalho por dia útil na facção
+  const dailyRate = Math.max(1, hourlyRate * 8);
+
+  const daysRemaining = Math.max(1, Math.ceil(remainingProc / dailyRate));
+  const estDate = new Date(Date.now() + daysRemaining * 24 * 60 * 60 * 1000);
+
+  const day = String(estDate.getDate()).padStart(2, '0');
+  const month = String(estDate.getMonth() + 1).padStart(2, '0');
+  const year = estDate.getFullYear();
+
+  return {
+    formattedDate: `${day}/${month}/${year}`,
+    isDefault: false,
+    rateText: `${Math.round(hourlyRate)} proc/h (~${daysRemaining} dia${daysRemaining > 1 ? 's' : ''})`,
+    daysRemaining,
+  };
 }
