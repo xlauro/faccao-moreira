@@ -1,16 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
+import { SplashScreenView } from '../src/components/common/SplashScreenView';
 import '../globals.css';
+
+// Previnir ocultamento automatico da splash nativa ate que o app esteja pronto
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function InitialLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isLoading) return;
+
+    // Ocultar a splash nativa assim que os dados terminarem de carregar
+    SplashScreen.hideAsync().catch(() => {});
 
     const inAuthGroup = segments[0] === '(auth)';
 
@@ -24,11 +31,7 @@ function InitialLayout() {
   }, [isAuthenticated, isLoading, segments]);
 
   if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-[#2C1435]">
-        <ActivityIndicator size="large" color="#6B224F" />
-      </View>
-    );
+    return <SplashScreenView message="Carregando dados da facção..." />;
   }
 
   return (
