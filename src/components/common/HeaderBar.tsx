@@ -8,12 +8,16 @@ interface HeaderBarProps {
   title?: string;
   onRefresh: () => void;
   onLogout: () => void;
+  onCheckUpdate?: () => void;
+  isCheckingUpdate?: boolean;
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({
   title = 'Facção Moreira 🧵',
   onRefresh,
   onLogout,
+  onCheckUpdate,
+  isCheckingUpdate = false,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -26,6 +30,20 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       >
         <Text className="text-white text-lg font-bold">{title}</Text>
         <View className="flex-row items-center">
+          {onCheckUpdate && (
+            <TouchableOpacity
+              onPress={onCheckUpdate}
+              disabled={isCheckingUpdate}
+              className="p-2 mr-1"
+              accessibilityLabel="Verificar atualizações"
+            >
+              <Ionicons
+                name={isCheckingUpdate ? 'cloud-download-outline' : 'arrow-up-circle-outline'}
+                size={22}
+                color="#fff"
+              />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity onPress={onRefresh} className="p-2 mr-1">
             <Ionicons name="refresh" size={22} color="#fff" />
           </TouchableOpacity>

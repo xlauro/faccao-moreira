@@ -44,3 +44,9 @@ app-example
 
 # Flutter folder
 faccao-moreira/
+
+# Terraform
+terraform/.terraform/
+*.tfstate
+*.tfstate.backup
+terraform.tfvars

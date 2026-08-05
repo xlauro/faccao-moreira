@@ -8,7 +8,9 @@ import { WelcomeHeaderCard } from '../src/components/home/WelcomeHeaderCard';
 import { DefectInputModal } from '../src/components/modals/DefectInputModal';
 import { HistoryLogModal } from '../src/components/modals/HistoryLogModal';
 import { ProcessInputModal } from '../src/components/modals/ProcessInputModal';
+import { UpdateAvailableModal } from '../src/components/modals/UpdateAvailableModal';
 import { useAuth } from '../src/context/AuthContext';
+import { useAppUpdate } from '../src/hooks/useAppUpdate';
 import { useServiceActions } from '../src/hooks/useServiceActions';
 import { useServices } from '../src/hooks/useServices';
 
@@ -27,17 +29,39 @@ export default function HomeScreen() {
 
   const actions = useServiceActions(fetchServices);
 
+  const {
+    currentVersion,
+    versionInfo,
+    hasUpdate,
+    isChecking,
+    modalVisible,
+    checkUpdate,
+    downloadAndInstall,
+    closeModal,
+  } = useAppUpdate(true);
+
   return (
     <View className="flex-1 bg-gray-100">
       {/* Top Header Bar */}
-      <HeaderBar title="Facção Moreira 🧵" onRefresh={fetchServices} onLogout={logout} />
+      <HeaderBar
+        title="Facção Moreira 🧵"
+        onRefresh={fetchServices}
+        onLogout={logout}
+        onCheckUpdate={() => checkUpdate(true)}
+        isCheckingUpdate={isChecking}
+      />
 
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#6B224F']} />}
         contentContainerStyle={{ padding: 16 }}
       >
         {/* Welcome Banner */}
-        <WelcomeHeaderCard userName={currentUser?.name} />
+        <WelcomeHeaderCard
+          userName={currentUser?.name}
+          currentVersion={currentVersion}
+          hasUpdate={hasUpdate}
+          onCheckUpdate={() => checkUpdate(true)}
+        />
 
         {/* Primary Action Buttons */}
         <HomeActionButtons />
@@ -108,6 +132,14 @@ export default function HomeScreen() {
         logs={actions.historyLogs}
         loading={actions.loadingHistory}
         onClose={() => actions.setHistoryModalVisible(false)}
+      />
+
+      <UpdateAvailableModal
+        visible={modalVisible}
+        currentVersion={currentVersion}
+        versionInfo={versionInfo}
+        onDownload={downloadAndInstall}
+        onClose={closeModal}
       />
     </View>
   );

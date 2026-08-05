@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.faccaomoreira.welth",
       "adaptiveIcon": {
         "backgroundColor": "#2C1435",
         "foregroundImage": "./assets/images/android-icon-foreground.png"

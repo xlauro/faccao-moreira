@@ -109,12 +109,12 @@ resource "oci_core_subnet" "faccao_subnet" {
   route_table_id    = oci_core_route_table.faccao_route_table.id
 }
 
-# 6. Data Source para encontrar a Imagem Ubuntu 24.04 aarch64 (ARM)
-data "oci_core_images" "ubuntu_arm" {
+# 6. Data Source para encontrar a Imagem Ubuntu 24.04 x86_64 (AMD)
+data "oci_core_images" "ubuntu_amd" {
   compartment_id           = var.compartment_ocid
   operating_system         = "Canonical Ubuntu"
   operating_system_version = "24.04"
-  shape                    = "VM.Standard.A1.Flex"
+  shape                    = "VM.Standard.E2.1.Micro"
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"
 }
@@ -124,17 +124,12 @@ data "oci_identity_availability_domains" "ads" {
   compartment_id = var.compartment_ocid
 }
 
-# 8. Instância Always Free VM (Ampere A1 Flex 4 OCPUs / 24GB RAM)
+# 8. Instância Always Free VM (AMD E2.1.Micro 1 OCPU / 1GB RAM)
 resource "oci_core_instance" "faccao_server" {
   availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
   compartment_id      = var.compartment_ocid
   display_name        = var.instance_name
-  shape               = "VM.Standard.A1.Flex"
-
-  shape_config {
-    ocpus         = 4
-    memory_in_gbs = 24
-  }
+  shape               = "VM.Standard.E2.1.Micro"
 
   create_vnic_details {
     subnet_id        = oci_core_subnet.faccao_subnet.id
@@ -144,7 +139,7 @@ resource "oci_core_instance" "faccao_server" {
 
   source_details {
     source_type = "image"
-    source_id   = data.oci_core_images.ubuntu_arm.images[0].id
+    source_id   = data.oci_core_images.ubuntu_amd.images[0].id
   }
 
   metadata = {
