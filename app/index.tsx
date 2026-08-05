@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { HeaderBar } from '../src/components/common/HeaderBar';
 import { HomeActionButtons } from '../src/components/home/HomeActionButtons';
 import { ServiceCard } from '../src/components/home/ServiceCard';
 import { SummaryStatsOverview } from '../src/components/home/SummaryStatsOverview';
 import { WelcomeHeaderCard } from '../src/components/home/WelcomeHeaderCard';
+import { AboutAppModal } from '../src/components/modals/AboutAppModal';
 import { DefectInputModal } from '../src/components/modals/DefectInputModal';
 import { HistoryLogModal } from '../src/components/modals/HistoryLogModal';
 import { ProcessInputModal } from '../src/components/modals/ProcessInputModal';
+import { SideMenuDrawer } from '../src/components/modals/SideMenuDrawer';
 import { UpdateAvailableModal } from '../src/components/modals/UpdateAvailableModal';
 import { useAuth } from '../src/context/AuthContext';
 import { useAppUpdate } from '../src/hooks/useAppUpdate';
@@ -16,6 +18,9 @@ import { useServices } from '../src/hooks/useServices';
 
 export default function HomeScreen() {
   const { currentUser, logout } = useAuth();
+  const [sideMenuVisible, setSideMenuVisible] = useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
+
   const {
     services,
     loading,
@@ -47,8 +52,10 @@ export default function HomeScreen() {
         title="Facção Moreira 🧵"
         onRefresh={fetchServices}
         onLogout={logout}
+        onOpenMenu={() => setSideMenuVisible(true)}
         onCheckUpdate={() => checkUpdate(true)}
         isCheckingUpdate={isChecking}
+        hasUpdate={hasUpdate}
       />
 
       <ScrollView
@@ -107,6 +114,27 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* Modals */}
+      <SideMenuDrawer
+        visible={sideMenuVisible}
+        userName={currentUser?.name}
+        userEmail={currentUser?.email}
+        currentVersion={currentVersion}
+        hasUpdate={hasUpdate}
+        onClose={() => setSideMenuVisible(false)}
+        onOpenAbout={() => setAboutModalVisible(true)}
+        onCheckUpdate={() => checkUpdate(true)}
+        onLogout={logout}
+      />
+
+      <AboutAppModal
+        visible={aboutModalVisible}
+        currentVersion={currentVersion}
+        hasUpdate={hasUpdate}
+        latestVersion={versionInfo?.latestVersion}
+        onClose={() => setAboutModalVisible(false)}
+        onCheckUpdate={() => checkUpdate(true)}
+      />
+
       <ProcessInputModal
         visible={actions.processModalVisible}
         service={actions.selectedServiceForProcess}

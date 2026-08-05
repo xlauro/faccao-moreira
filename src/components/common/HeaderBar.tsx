@@ -9,7 +9,9 @@ interface HeaderBarProps {
   onRefresh: () => void;
   onLogout: () => void;
   onCheckUpdate?: () => void;
+  onOpenMenu?: () => void;
   isCheckingUpdate?: boolean;
+  hasUpdate?: boolean;
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({
@@ -17,7 +19,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onRefresh,
   onLogout,
   onCheckUpdate,
+  onOpenMenu,
   isCheckingUpdate = false,
+  hasUpdate = false,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -28,7 +32,18 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
         className="bg-brand-plum px-4 pb-3 flex-row justify-between items-center shadow"
         style={{ paddingTop: Math.max(insets.top, 12) }}
       >
-        <Text className="text-white text-lg font-bold">{title}</Text>
+        <View className="flex-row items-center">
+          {onOpenMenu && (
+            <TouchableOpacity onPress={onOpenMenu} className="p-2 mr-2 relative">
+              <Ionicons name="menu-outline" size={26} color="#fff" />
+              {hasUpdate && (
+                <View className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-emerald-400 border border-[#2C1435]" />
+              )}
+            </TouchableOpacity>
+          )}
+          <Text className="text-white text-lg font-bold">{title}</Text>
+        </View>
+
         <View className="flex-row items-center">
           {onCheckUpdate && (
             <TouchableOpacity
