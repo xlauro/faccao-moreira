@@ -2,7 +2,7 @@
   "expo": {
     "name": "Facção Moreira",
     "slug": "faccao-moreira",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "faccaomoreira",
@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.faccaomoreira.welth",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "backgroundColor": "#2C1435",
         "foregroundImage": "./assets/images/android-icon-foreground.png"

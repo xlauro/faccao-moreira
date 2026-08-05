@@ -57,12 +57,13 @@ export function isVersionNewer(currentVersion: string, latestVersion: string): b
 export async function fetchLatestVersionInfo(url: string = DEFAULT_UPDATE_URL): Promise<VersionInfo | null> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'Cache-Control': 'no-cache',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
         Accept: 'application/json',
       },
     });
@@ -70,14 +71,14 @@ export async function fetchLatestVersionInfo(url: string = DEFAULT_UPDATE_URL): 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      console.warn(`[UpdateService] HTTP status error: ${response.status}`);
+      console.warn(`[UpdateService] Erro de status HTTP: ${response.status}`);
       return null;
     }
 
     const data: VersionInfo = await response.json();
     return data;
   } catch (error) {
-    console.warn('[UpdateService] Erro ao buscar informações de atualização:', error);
+    console.warn('[UpdateService] Falha de rede ao buscar informações de atualização:', error);
     return null;
   }
 }
