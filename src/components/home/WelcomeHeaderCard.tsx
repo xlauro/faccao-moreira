@@ -42,7 +42,10 @@ export const WelcomeHeaderCard: React.FC<WelcomeHeaderCardProps> = ({
             )}
           </TouchableOpacity>
         </View>
-        <Text className="text-white/80 text-xs mt-0.5">Ateliê de Costura Compartilhado</Text>
+        <View className="flex-row items-center mt-0.5">
+          <View className="w-2 h-2 rounded-full bg-emerald-400 mr-1.5" />
+          <Text className="text-white/80 text-xs font-medium">Ateliê de Costura Compartilhado • Online</Text>
+        </View>
       </View>
     </View>
   );

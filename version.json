@@ -1,7 +1,7 @@
 {
-  "latestVersion": "1.2.2",
-  "versionCode": 5,
-  "apkUrl": "http://163.176.224.111/apk/welth-v1.2.2.apk",
+  "latestVersion": "1.2.3",
+  "versionCode": 6,
+  "apkUrl": "http://163.176.224.111/apk/welth-v1.2.3.apk",
   "forceUpdate": false,
-  "releaseNotes": "Versão 1.2.2: Permissão de tráfego de rede HTTP ativada (usesCleartextTraffic), Menu Sanduíche e atualizações automáticas."
+  "releaseNotes": "Versão 1.2.3: Atualização automática ativada! Novo indicador de status online e melhorias no menu de navegação."
 }
